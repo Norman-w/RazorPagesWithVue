@@ -1,0 +1,13 @@
+@{
+    //读取cm.vue文件
+    var cmVue = System.IO.File.ReadAllText("Views/Shared/VueComponents/cm.vue");
+    //替换掉template标签
+    cmVue = cmVue.Replace("<template ", "<script ");
+    //替换掉template标签结尾
+    cmVue = cmVue.Replace("</template>", "</script>");
+    //去掉 export default comp;
+    // cmVue = cmVue.Replace("export default comp;", "");
+    //去掉import Light from "./light.vue";
+    cmVue = cmVue.Replace("import Light from \"./light.vue\";", "");
+    @Html.Raw(cmVue)
+}

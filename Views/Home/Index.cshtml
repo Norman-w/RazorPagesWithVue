@@ -3,9 +3,10 @@
 @(await Html.UseVueComponent("lights-container"))
 
 <div id="app">
-    <div>{{hello}}, 这是使用new Vue的方式挂载的组件,IDE没有丰富的代码提示</div>
+    @* <div>{{hello}}, 这是使用new Vue的方式挂载的组件,IDE没有丰富的代码提示</div> *@
     <div>下面是VUE的组件</div>
-    <lights-container></lights-container>
+    @* 为lights-container传入border属性,pink, 并且封闭标签 *@
+    <lights-container color="pink" />
     <div>下面是传统的MVC组件</div>
     <div>STATIC</div>
 </div>

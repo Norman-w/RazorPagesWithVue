@@ -1,16 +1,23 @@
-﻿@section VueComponents
-{
-    @* @Html.Partial("VueComponents/_CoffeeMaker") *@
-    @Html.Partial("VueComponents/light")
-    @Html.Partial("VueComponents/cm")
-    @Html.Partial("VueComponents/_ProgressBar")
-}
+﻿@* 在普通的cshtml中使用vue组件时, 使用VueComponents或 HtmlPartial等方式引用组件,比如引用一个vue制作的窗体 *@
+
+@* @section VueComponents *@
+@* { *@
+@*     @await Html.PartialAsync("VueComponents/LightsContainer/index.cshtml") *@
+@* } *@
+
+@* 相当于import *@
+@await Html.PartialAsync("VueComponents/lights-container")
+
+@* 然后定义一个锚点,挂载这个窗体 *@
 <div id="app">
-    <div>{{hello}}</div>
-    <coffee-maker></coffee-maker>
-    <light></light>
+    <div>{{hello}}, 这是使用new Vue的方式挂载的组件,IDE没有丰富的代码提示</div>
+    <div>下面是VUE的组件</div>
+    <lights-container></lights-container>
+    <div>下面是传统的MVC组件</div>
+    <div>STATIC</div>
 </div>
 
+@* 编写主vue的js,提供挂载,但是这种方式引用的vue在cshtml中不具备代码索引功能.所以做大量vue组件和vue的组件嵌套使用等场景时,使用 类似于 lights-container内再引入light的方式.这样可以在vs中使用vue的代码索引功能. *@
 <script>
     new Vue({
         el: "#app",
@@ -19,3 +26,9 @@
         }
     });
 </script>
+
+@* cshtml中使用vue组件的步骤: *@
+@* 1.通过Html.Partial或者@section VueComponents引入vue组件的cshtml文档,这个cshtml文档包含引用并能输出一个.vue文件作为主体 *@
+@* 2.在cshtml定义一个用于挂载的锚点,比如<div id="app"></div> *@
+@* 3.在cshtml中编写主vue的js,提供挂载 *@
+@* 4.在cshtml的锚点内使用vue组件,比如<lights-container></lights-container> *@

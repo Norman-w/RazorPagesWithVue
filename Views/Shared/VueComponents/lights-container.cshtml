@@ -1,0 +1,5 @@
+@using RazorPagesWithVue.Views.Shared.VueComponents
+//引用组件
+@(await Html.PartialAsync("VueComponents/light"))
+//渲染自身
+@(await Html.VueComponent("lights-container"))

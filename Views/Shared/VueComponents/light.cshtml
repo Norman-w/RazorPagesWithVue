@@ -1,12 +1,2 @@
-@{
-    //读取cm.vue文件
-    var lightVue = System.IO.File.ReadAllText("Views/Shared/VueComponents/light.vue");
-    //替换掉template标签
-    lightVue = lightVue.Replace("<template ", "<script ");
-    //替换掉template标签结尾
-    lightVue = lightVue.Replace("</template>", "</script>");
-    //去掉 export default comp;
-    lightVue = lightVue.Replace("export default lightComp;", "");
-    Console.WriteLine(lightVue);
-    @Html.Raw(lightVue)
-}
+@using RazorPagesWithVue.Views.Shared.VueComponents
+@(await Html.VueComponent("light"))

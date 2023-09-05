@@ -138,4 +138,21 @@ public static class HtmlExtensions
     var filePath = SearchVueFile(componentName);
     return await htmlHelper.LoadVueComponent(filePath);
   }
+  
+  public static IHtmlContent EnableVueContainers(this IHtmlHelper htmlHelper, params string[] containersName)
+  {
+    if (containersName is null || containersName.Length == 0)
+    {
+      return HtmlString.Empty;
+    }
+    var contentBuilder = new StringBuilder();
+    contentBuilder.AppendLine("<script>");
+    foreach (var containerName in containersName)
+    {
+      // 类似于 new Vue({el: "#app"});
+      contentBuilder.AppendLine($"new Vue({{el: \"#{containerName}\"}});");
+    }
+    contentBuilder.AppendLine("</script>");
+    return new HtmlString(contentBuilder.ToString());
+  }
 }

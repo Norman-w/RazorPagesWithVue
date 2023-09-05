@@ -1,12 +1,7 @@
-﻿@* 在普通的cshtml中使用vue组件时, 使用VueComponents或 HtmlPartial等方式引用组件,比如引用一个vue制作的窗体 *@
+﻿@using RazorPagesWithVue.Views.Shared.VueComponents
 
-@* @section VueComponents *@
-@* { *@
-@*     @await Html.PartialAsync("VueComponents/LightsContainer/index.cshtml") *@
-@* } *@
+@(await Html.UseVueComponent("lights-container"))
 
-@* 相当于import *@
-@await Html.PartialAsync("VueComponents/lights-container")
 
 @* 然后定义一个锚点,挂载这个窗体 *@
 <div id="app">

@@ -1,13 +1,13 @@
-<template type="text/html" id="light">
-  <div class="light" :class="{on: lightOn}" style="border: 1px solid red" @click="toggleLight">
+<template type="text/html" id="smallLight">
+  <div class="light" :class="{on: lightOn}" style="border: 1px solid seagreen" @click="toggleLight">
     All on? {{ allOn }}
   </div>
 </template>
 
 
-<script>
-let light = {
-  template: "#" + "light",
+<script itemscope>
+let smallLight = {
+  template: "#" + "smallLight",
   props: ["allOn", "on-light-click"],
   data() {
     return {
@@ -21,7 +21,8 @@ let light = {
     }
   }
 }
-export default light;
+// Vue.component("small-light", smallLight);
+export default smallLight;
 </script>
 
 
@@ -29,7 +30,7 @@ export default light;
 .light {
   width: 100px;
   height: 100px;
-  background-color: darkgray;
+  background-color: darkslategray;
   border-radius: 50%;
   border: 1px solid black;
   margin: 10px;
@@ -43,6 +44,6 @@ export default light;
 }
 
 .light.on {
-  background-color: lightblue;
+  background-color:lightgreen;
 }
 </style>

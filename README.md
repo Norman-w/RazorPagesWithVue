@@ -36,4 +36,4 @@
     Vue.component("Header", comp);
     export default comp;`
     这些内容尽量不要改格式.但是Header,comp,xxx,zzz这些自己根据情况修改.
-    ##### 必须指定一个 ```<style>```标签,可以有附加的参数如scoped,lang等,在这里面写vue的css代码
+    ##### 必须指定一个 ```<style>```标签,可以有附加的参数如scoped,lang等,在这里面写vue的css代码,但是请注意,??一定不要再style中使用双斜杠注释,否则会导致vue的css代码无法正常运行.如果需要注释,请使用/* */注释(有的编译器不会提示//注释的错误,所以请注意)

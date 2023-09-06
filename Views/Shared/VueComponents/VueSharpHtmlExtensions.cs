@@ -148,11 +148,18 @@ public static class HtmlExtensions
   /// 输出vue组件
   /// </summary>
   /// <param name="htmlHelper"></param>
-  /// <param name="componentName">component的名字</param>
+  /// <param name="componentNameOrPath">component的名字,或者是路径.如果给定名字,则进行搜索</param>
   /// <returns></returns>
-  public static async Task<IHtmlContent> UseVueComponent(this IHtmlHelper htmlHelper, string componentName)
+  public static async Task<IHtmlContent> UseVueComponent(this IHtmlHelper htmlHelper, string componentNameOrPath)
   {
-    var filePath = SearchVueFile(componentName);
+    //判断给定的路径是否为相对或者绝对路径而非组件名
+    if (componentNameOrPath.Contains('/') || componentNameOrPath.Contains('\\'))
+    {
+      //如果是路径,则直接加载
+      return await htmlHelper.LoadVueComponent(componentNameOrPath);
+    }
+    //如果是组件名,则搜索
+    var filePath = SearchVueFile(componentNameOrPath);
     return await htmlHelper.LoadVueComponent(filePath);
   }
   

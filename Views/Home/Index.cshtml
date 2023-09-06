@@ -1,34 +1,46 @@
-﻿@using RazorPagesWithVue.Views.Shared.VueComponents
-
+﻿@* 引用组件 *@
 @(await Html.UseVueComponent("lights-container"))
 
+
+@* C#传递至Vue组件的参数集初始化 *@
+@{
+	var tags = new[] { "'光头'", "矮", "瘦" };
+	var user = new
+	{
+		name = "张三", age = 18, tags
+	};
+	var room = new
+	{
+		number = 10, floor = 2, name = "royal",
+		facilities = new []{ "tv", "bed", "light" },
+	};
+
+	Dictionary<string, object> parameters = new();
+	// parameters.Add("user", user);
+	parameters.Add("room", room);
+}
+
+
+@* 定义锚点 *@
 <div id="app">
-    @* <div>{{hello}}, 这是使用new Vue的方式挂载的组件,IDE没有丰富的代码提示</div> *@
-    <div>下面是VUE的组件</div>
-    @* 为lights-container传入border属性,pink, 并且封闭标签 *@
-    <lights-container color="pink" />
-    <div>下面是传统的MVC组件</div>
-    <div>STATIC</div>
+	@*使用组件,提供props,传递C#对象的引用
+        直接传递字符串					title="xxx"     
+        传递C#中的值类型,有警告			:room="xxxRef"  
+        错误的引用,json的"冲突				:user="@Json.Encode(user)"
+        正确的引用,有'警告					:user='@Json.Encode(user)'
+    *@
+	<lights-container 
+		color="pink" 
+		:user='@Json.Serialize(user)' 
+		:room="room"
+		title="This is title"
+	/>
 </div>
 
-@* 编写主vue的js,提供挂载,但是这种方式引用的vue在cshtml中不具备代码索引功能.所以做大量vue组件和vue的组件嵌套使用等场景时,使用 类似于 lights-container内再引入light的方式.这样可以在vs中使用vue的代码索引功能. *@
-@* <script> *@
-@*     new Vue({ *@
-@*         el: "#app", *@
-@*         data:{ *@
-@*           hello:'hello vue' *@
-@*         } *@
-@*     }); *@
-@* </script> *@
 
-@Html.EnableVueContainers("app")
+@* 使能多个,不传C#参数 *@
+@* @Html.EnableVueContainers("app") *@
 
-@* 在cshtml中使用vue组件的步骤. *@
-@* *@
-@* 引入组件,如  @(await Html.UseVueComponent("lights-container")) *@
-@* 定义一个锚点,如  <div id="app"></div> *@
-@* 在锚点内使用组件,如 <lights-container></lights-container> *@
-@* 使用 @Html.EnableVueContainers("app") 以使能vue组件的挂载 *@
-@* 三步的顺序不能差,即先声明后使用,最后使能 *@
-```
 
+@* 使能单个,传递C#参数 *@
+@Html.EnableVueContainer("app", parameters);

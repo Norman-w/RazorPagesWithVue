@@ -15,11 +15,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace RazorPagesWithVue.Views.Shared.VueComponents;
+namespace RazorPagesWithVue;
 
 public static class HtmlExtensions
 {
@@ -163,19 +164,61 @@ public static class HtmlExtensions
     return await htmlHelper.LoadVueComponent(filePath);
   }
   
-  public static IHtmlContent EnableVueContainers(this IHtmlHelper htmlHelper, params string[] containersName)
+  
+  /// <summary>
+  /// 使能多个容器,不向容器提供来自C#的参数.
+  /// 若要在cshtml中容器内的组件上使用来自C#的参数,可使用
+  /// :user='@Json.Serialize(user)'的方式传递.注意是单引号,因双引号会和json冲突
+  /// </summary>
+  /// <param name="htmlHelper"></param>
+  /// <param name="containersId"></param>
+  /// <returns></returns>
+  public static IHtmlContent EnableVueContainers(this IHtmlHelper htmlHelper, params string[] containersId)
   {
-    if (containersName is null || containersName.Length == 0)
+    if (containersId is null || containersId.Length == 0)
     {
       return HtmlString.Empty;
     }
     var contentBuilder = new StringBuilder();
     contentBuilder.AppendLine("<script>");
-    foreach (var containerName in containersName)
+    foreach (var containerId in containersId)
     {
       // 类似于 new Vue({el: "#app"});
-      contentBuilder.AppendLine($"new Vue({{el: \"#{containerName}\"}});");
+      contentBuilder.AppendLine($"new Vue({{el: \"#{containerId}\"}});");
     }
+    contentBuilder.AppendLine("</script>");
+    return new HtmlString(contentBuilder.ToString());
+  }
+
+  /// <summary>
+  /// 使能容器,使容器内支持使用vue组件,并且可以在使用组件时传递通过paramsKeyAndValue传入的参数
+  /// </summary>
+  /// <param name="htmlHelper"></param>
+  /// <param name="containerId">要使能的容器id</param>
+  /// <param name="paramsKeyAndValue">
+  /// 通过键值对的形式传入C#对象,该容器内的组件即可使用这些对象
+  /// 因可在组件上直接使用 :user='@Json.Serialize(user)'的形式传递参数,故该参数亦可为空.
+  /// </param>
+  /// <returns></returns>
+  public static IHtmlContent EnableVueContainer(this IHtmlHelper htmlHelper, string containerId, Dictionary<string,object> paramsKeyAndValue)
+  {
+    if (containerId is null)
+    {
+      return HtmlString.Empty;
+    }
+
+    paramsKeyAndValue ??= new Dictionary<string, object>();
+    
+    var contentBuilder = new StringBuilder();
+    contentBuilder.AppendLine("<script>");
+    contentBuilder.Append("new Vue ({el:'#app',data:{ ");
+    foreach (var (key, value) in paramsKeyAndValue)
+    {
+      var json = JsonSerializer.Serialize(value);
+      // contentBuilder.Append($"{key}:'{json}',");
+      contentBuilder.Append($"{key}:{json},");
+    }
+    contentBuilder.Append(" } })");
     contentBuilder.AppendLine("</script>");
     return new HtmlString(contentBuilder.ToString());
   }

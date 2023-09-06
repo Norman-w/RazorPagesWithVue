@@ -227,8 +227,19 @@ public static class HtmlExtensions
     contentBuilder.Append("new Vue ({el:'#app',data:{ ");
     foreach (var (key, value) in paramsKeyAndValue)
     {
+      //值类型和引用类型使用不同方式传递
+      if (value.GetType().IsValueType)
+      {
+        //如果是布尔类型,转换成小写
+        if (value is bool)
+        {
+          contentBuilder.Append($"{key}:{value.ToString()?.ToLower()},");
+          continue;
+        }
+        contentBuilder.Append($"{key}:{value},");
+        continue;
+      }
       var json = JsonSerializer.Serialize(value);
-      // contentBuilder.Append($"{key}:'{json}',");
       contentBuilder.Append($"{key}:{json},");
     }
     contentBuilder.Append(" } })");

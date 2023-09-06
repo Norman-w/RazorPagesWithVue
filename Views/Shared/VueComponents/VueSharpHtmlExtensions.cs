@@ -156,9 +156,7 @@ public static class HtmlExtensions
     //输出
     return new HtmlString(contentBuilder.ToString());
   }
-
   
-  //拓展public interface IHtmlHelper<TModel> : IHtmlHelper, 让用户可以直接调用 @Html.VueComponent(string)来输出
   /// <summary>
   /// 输出vue组件
   /// </summary>

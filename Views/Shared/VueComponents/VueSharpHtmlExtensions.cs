@@ -1,3 +1,17 @@
+// Author: Norman
+// Create: Sep.05 2023
+// Modify: Sep.06 2023
+// Description:
+// 为了让用户可以在cshtml中使用vue组件更便切易维护,构造此类
+
+// 使用分为3步
+// 引用: @Html.UseVueComponent("xxx")
+// 锚点: 如 <div id="aaa"></div>
+// 使能: @Html.EnableVueContainers("aaa")
+
+// 创建vue组件
+// 在Views/Shared/VueComponents中创建xxx.vue文件即可, xxx就是上面引用时的xxx
+
 using System;
 using System.Collections.Generic;
 using System.IO;

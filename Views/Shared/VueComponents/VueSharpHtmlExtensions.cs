@@ -1,8 +1,7 @@
 // Author: Norman
 // Create: Sep.05 2023
-// Modify: Sep.06 2023
 // Description:
-// 为了让用户可以在cshtml中使用vue组件更便切易维护,构造此类
+// 为了让用户可以在cshtml中使用vue组件更方便且更易维护,构造此类
 
 // 使用分为3步
 // 引用: @Html.UseVueComponent("xxx")
@@ -64,10 +63,12 @@ public static class HtmlExtensions
 
   /// <summary>
   /// 获取引用的组件和组件的路径
+  /// 因在script标签中不能使用import,所以需要将import的内容提取出来判断引用,并将import的内容替换掉
   /// </summary>
   /// <param name="scriptContent"></param>
-  /// <returns></returns>
-  private static Dictionary<string, string> GetComponentsUsingDic(ref string scriptContent)
+  /// <param name="callerPath"></param>
+  /// <returns>返回tag的类型名称和绝对路径的字典</returns>
+  private static Dictionary<string, string> GetComponentsUsingDic(ref string scriptContent, string callerPath)
   {
     Dictionary<string,string> tagTypeAndPathDic = new();
     //找到这个文件中所有的import xxx from 'xxx';
@@ -81,8 +82,11 @@ public static class HtmlExtensions
       var tagPath = match.Value.Substring(match.Value.IndexOf("from", StringComparison.Ordinal) + 5,
         match.Value.Length - match.Value.IndexOf("from", StringComparison.Ordinal) - 6);
       tagPath = tagPath.Trim('\"');
+      
+      //tag的绝对路径
+      var tagFullPath = Path.Combine(Path.GetDirectoryName(callerPath) ?? string.Empty, tagPath);
       //如果字典中不存在该标签,则添加
-      tagTypeAndPathDic.TryAdd(tagType, tagPath);
+      tagTypeAndPathDic.TryAdd(tagType, tagFullPath);
       scriptContent = scriptContent.Replace(match.Value, "");
     }
     return tagTypeAndPathDic;
@@ -104,28 +108,27 @@ public static class HtmlExtensions
     thisComponentContent =
       System.Text.RegularExpressions.Regex.Replace(thisComponentContent, @"export default \w+;", "");
     thisComponentContent = thisComponentContent.Replace("export default", "");
-    var usingComponentsDic = GetComponentsUsingDic(ref thisComponentContent);
+    var usingComponentsFullPathDic = GetComponentsUsingDic(ref thisComponentContent, componentFullPath);
     //通过匹配到的tag类型,确认要使用Html.PartialAsync加载哪些文件
-    foreach (var tagType in usingComponentsDic)
+    foreach (var tagComponentTypeAndPath in usingComponentsFullPathDic)
     {
       #region vue文件的路径,通过路径从缓存中取出文件内容,如果缓存中不存在,则加载文件内容
       //根据componentFullPath的路径和 类似于 ./xxx.vue 的路径,拼接出vue文件的路径
-      var vueFilePath = Path.Combine(Path.GetDirectoryName(componentFullPath) ?? string.Empty, tagType.Value);
-      if (BufferedContentDic.TryGetValue(vueFilePath, out var value))
+      if (BufferedContentDic.TryGetValue(tagComponentTypeAndPath.Value, out var value))
       {
         contentBuilder.Append(value);
         continue;
       }
       #endregion
       #region 如果文件不存在,则抛出异常
-      if (!File.Exists(vueFilePath))
+      if (!File.Exists(tagComponentTypeAndPath.Value))
       {
-        throw new Exception($"文件{vueFilePath}不存在");
+        throw new Exception($"文件{tagComponentTypeAndPath.Value}不存在");
       }
       #endregion
       #region 加载对应的文件,并将文件内容存储到缓存中
-      var partialContent = await htmlHelper.LoadVueComponent(vueFilePath);
-      BufferedContentDic.Add(vueFilePath, partialContent.ToString());
+      var partialContent = await htmlHelper.LoadVueComponent(tagComponentTypeAndPath.Value);
+      BufferedContentDic.Add(tagComponentTypeAndPath.Value, partialContent.ToString());
       #endregion
       //将加载到的文件添加到contentBuilder中
       contentBuilder.Append(partialContent);

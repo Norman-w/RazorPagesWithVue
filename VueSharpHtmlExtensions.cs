@@ -113,23 +113,38 @@ public static class HtmlExtensions
     //通过匹配到的tag类型,确认要使用Html.PartialAsync加载哪些文件
     foreach (var tagComponentTypeAndPath in usingComponentsFullPathDic)
     {
-      #region vue文件的路径,通过路径从缓存中取出文件内容,如果缓存中不存在,则加载文件内容
-      //根据componentFullPath的路径和 类似于 ./xxx.vue 的路径,拼接出vue文件的路径
-      if (BufferedContentDic.TryGetValue(tagComponentTypeAndPath.Value, out var value))
+      #region vue文件的路径,通过路径从缓存中取出文件内容,如果缓存中不存在,则加载文件内容.
+
+      //如果当前有调试器附加,则不启用缓存功能.便于修改vue文件后可以直接刷新网页获取最新的vue文件内容
+      if (!System.Diagnostics.Debugger.IsAttached)
       {
-        contentBuilder.Append(value);
-        continue;
+        //根据componentFullPath的路径和 类似于 ./xxx.vue 的路径,拼接出vue文件的路径
+        if (BufferedContentDic.TryGetValue(tagComponentTypeAndPath.Value, out var value))
+        {
+          contentBuilder.Append(value);
+          continue;
+        }
       }
+
       #endregion
+
       #region 如果文件不存在,则抛出异常
+
       if (!File.Exists(tagComponentTypeAndPath.Value))
       {
         throw new Exception($"文件{tagComponentTypeAndPath.Value}不存在");
       }
+
       #endregion
-      #region 加载对应的文件,并将文件内容存储到缓存中
+
+      #region 加载对应的文件,并将文件内容存储到缓存中(如果不在调试)
+
       var partialContent = await htmlHelper.LoadVueComponent(tagComponentTypeAndPath.Value);
-      BufferedContentDic.Add(tagComponentTypeAndPath.Value, partialContent.ToString());
+      if (!System.Diagnostics.Debugger.IsAttached)
+      {
+        BufferedContentDic.Add(tagComponentTypeAndPath.Value, partialContent.ToString());
+      }
+
       #endregion
       //将加载到的文件添加到contentBuilder中
       contentBuilder.Append(partialContent);
@@ -142,9 +157,7 @@ public static class HtmlExtensions
     //输出
     return new HtmlString(contentBuilder.ToString());
   }
-
   
-  //拓展public interface IHtmlHelper<TModel> : IHtmlHelper, 让用户可以直接调用 @Html.VueComponent(string)来输出
   /// <summary>
   /// 输出vue组件
   /// </summary>
